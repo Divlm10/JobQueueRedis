@@ -1,4 +1,4 @@
-import {getJob,addJob} from "./queue.js";
+import {getJob,addJob, addFailedJobs} from "./queue.js";
 
 async function worker(){
     console.log("Worker started..");
@@ -33,10 +33,13 @@ async function worker(){
             if(job.retries <= job.maxRetries){
                 //within limit=>retry
                 console.log(`Retrying Job ${job.id} (${job.retries}/${job.maxRetries})`);
-                await addJob(job);
+                await addJob(job);//lpush curr job in list
             }
             else{//exceeded
-                console.log(`Job ${job.id} permanently failed`);
+                // console.log(`Job ${job.id} permanently failed`);
+                //handle Failed jobs
+                console.log(`Job ${job.id} permanently Failed`);
+                await addFailedJobs(job);//move to dlq
             }
         }
     }

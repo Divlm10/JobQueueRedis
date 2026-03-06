@@ -1,7 +1,7 @@
 import {redis} from "./redisClient.js";
 
 const QUEUE_NAME="job_queue";
-
+const FAILED_QUEUE="failed_jobs";//Dead letter Queue(DLQ)
 /*
 Add job to queue
 PRODUCER pushing a job.
@@ -32,9 +32,15 @@ export async function getJob(){
 }
 //blocking worker->block until a job appears(brpop)
 export async function getJobBlocking(){
-    const result=await redis.brpop(QUEUE_NAME);
+    const result = await redis.brpop(QUEUE_NAME);
+
     if(!result)return null;
     //returns [queueName,job]
     const job=result[1];
     return job;
+}
+
+export async function addFailedJobs(job){
+    await redis.lpush(FAILED_QUEUE,job);
+    console.log("Job moved to failed queue",job.id);
 }
