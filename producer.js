@@ -11,7 +11,9 @@ async function createJobs(){
         type: "send-email",
         payload:{
             email:"user@example.com"
-        }
+        },
+        retries:0,
+        maxRetries:3
     };
 
     await addJob(job);

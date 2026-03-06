@@ -30,3 +30,11 @@ export async function getJob(){
     // return JSON.parse(job);
     return job || null;
 }
+//blocking worker->block until a job appears(brpop)
+export async function getJobBlocking(){
+    const result=await redis.brpop(QUEUE_NAME);
+    if(!result)return null;
+    //returns [queueName,job]
+    const job=result[1];
+    return job;
+}
