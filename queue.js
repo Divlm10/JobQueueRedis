@@ -44,3 +44,13 @@ export async function addFailedJobs(job){
     await redis.lpush(FAILED_QUEUE,job);
     console.log("Job moved to failed queue",job.id);
 }
+
+export async function saveJob(job){
+    const key=`job:${job.id}`;//key for hashset
+
+    await redis.hset(key,{
+        status: "pending",  //start with pending
+        retries: job.retries,
+        type: job.type
+    });
+}
