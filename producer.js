@@ -1,4 +1,4 @@
-import { addJob, saveJob } from "./queue.js";
+import { addJob, saveJob, addDelayedJob } from "./queue.js";
 
 // producer represents API server => POST /send-email
 
@@ -16,7 +16,8 @@ async function createJobs(){
         maxRetries:3
     };
     await saveJob(job);//store job status
-    await addJob(job);
+    await addDelayedJob(job,10000);//10 seconds delay
+    // await addJob(job);
 
     console.log("Job successfully sent to queue");
 }

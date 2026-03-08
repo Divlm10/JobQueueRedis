@@ -2,6 +2,7 @@ import {redis} from "./redisClient.js";
 
 const QUEUE_NAME="job_queue";
 const FAILED_QUEUE="failed_jobs";//Dead letter Queue(DLQ)
+const DELAYED_QUEUE="delayed_jobs";
 /*
 Add job to queue
 PRODUCER pushing a job.
@@ -53,4 +54,16 @@ export async function saveJob(job){
         retries: job.retries,
         type: job.type
     });
+}
+
+export async function addDelayedJob(job,delayMS){
+    const runAt=Date.now() + delayMS;//score to add
+    
+    await redis.zadd(DELAYED_QUEUE,{
+        score: runAt,
+        // member: JSON.stringify(job) //convert obj to str
+        member: job
+    });
+
+    console.log(`Job ${job.id} scheduled for ${delayMS}ms later`);
 }
