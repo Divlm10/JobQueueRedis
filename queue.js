@@ -3,6 +3,11 @@ import {redis} from "./redisClient.js";
 const QUEUE_NAME="job_queue";
 const FAILED_QUEUE="failed_jobs";//Dead letter Queue(DLQ)
 const DELAYED_QUEUE="delayed_jobs";
+//priority
+const HIGH_QUEUE="high_queue";
+const NORMAL_QUEUE="normal_queue";
+const LOW_QUEUE="low_queue";
+
 /*
 Add job to queue
 PRODUCER pushing a job.
@@ -66,4 +71,17 @@ export async function addDelayedJob(job,delayMS){
     });
 
     console.log(`Job ${job.id} scheduled for ${delayMS}ms later`);
+}
+
+export async function addPriorityJob(job,priority="normal"){//default check with normal
+    if(priority==="high"){
+        await redis.lpush(HIGH_QUEUE,job);
+    }
+    else if(priority==="low"){
+        await redis.lpush(LOW_QUEUE,job);
+    }
+    else{
+        await redis.lpush(NORMAL_QUEUE,job);
+    }
+    console.log(`Job ${job.id} added with ${priority} priority`);
 }
