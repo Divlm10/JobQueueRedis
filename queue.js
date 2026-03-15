@@ -73,7 +73,8 @@ export async function addDelayedJob(job,delayMS){
     console.log(`Job ${job.id} scheduled for ${delayMS}ms later`);
 }
 
-export async function addPriorityJob(job,priority="normal"){//default check with normal
+export async function addPriorityJob(job){
+    const priority=job.priority || "normal";//extract from passed job or default to normal
     if(priority==="high"){
         await redis.lpush(HIGH_QUEUE,job);
     }
@@ -83,5 +84,11 @@ export async function addPriorityJob(job,priority="normal"){//default check with
     else{
         await redis.lpush(NORMAL_QUEUE,job);
     }
+
+    await redis.hset(`job:${job.id}`,{
+        status:"pending",
+        retries:job.retries
+    });
+
     console.log(`Job ${job.id} added with ${priority} priority`);
 }

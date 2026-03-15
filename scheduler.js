@@ -1,5 +1,5 @@
 import { redis } from "./redisClient.js";
-import { addJob } from "./queue.js";
+import { addJob, addPriorityJob } from "./queue.js";
 
 // This worker checks for jobs whose scheduled time has arrived.
 
@@ -31,9 +31,11 @@ async function scheduler(){
         for(const jobStr of jobs){
             // const job=JSON.parse(jobStr); //Convert Job String Back To get OG Object
             const job = jobStr;
-            console.log(`Moving delayed job ${job.id} to queue`);
+            console.log(`Moving delayed job ${job.id} to Priority Queue`);
             
-            await addJob(job);//push the job to main list queue=>LPUSH(job_queue,job)
+            // await addJob(job);//push the job to main list queue=>LPUSH(job_queue,job)
+            await addPriorityJob(job);
+            
             await redis.zrem(DELAYED_QUEUE,jobStr);//remove the job from delayed job queue=>avoid running again
         }
         //pause scheduler for 2 secs before next check
